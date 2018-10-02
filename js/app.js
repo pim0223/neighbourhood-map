@@ -16,11 +16,29 @@ var Place = function(result, map) {
 
     that.marker = that.makeMarker();
 
-    that.marker.addListener('click', function () {
-        map.infoWindow.setContent(this.title)
-        map.infoWindow.open(map, this);
-    });
+    that.marker.addPanorama = function () {
+        var panorama = new google.maps.StreetViewPanorama(
+          document.getElementById('panorama'), {
+            position: this.position,
+            pov: {
+              heading: 34,
+              pitch: 10
+            }
+          });
+        map.setStreetView(panorama);
+    }
 
+    that.marker.showInfoWindow = function () {
+        map.infoWindow.setContent('<div> <p>' + this.title + '</p> </div> <div id="panorama"></div>')
+        map.infoWindow.open(map, this);
+        this.addPanorama();
+    }
+
+    that.showInfoWindow = that.marker.showInfoWindow.bind(that.marker)
+
+    google.maps.event.addListener(that.marker, 'click', function () {
+        this.showInfoWindow();
+    });
 }
 
 var ViewModel = function () {
@@ -58,7 +76,7 @@ var ViewModel = function () {
 
         // Empty the places array
         that.places([]);
-        
+
         if (status === google.maps.places.PlacesServiceStatus.OK) {
             that.errorMessage('');
 

@@ -14,7 +14,7 @@
       <p>I want: <input data-bind="value: query" /> <button data-bind="click: search">GO</button> </p>
       <p data-bind="text: errorMessage"></p>
       <div data-bind="foreach: places">
-        <p data-bind="text: name"></p>
+        <p data-bind="text: name, click: showInfoWindow"></p>
       </div>
     </div>
     <div id="map"></div>
