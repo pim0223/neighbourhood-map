@@ -2,7 +2,7 @@
 <html>
 <head>
   
-  <title>nearby.</title>
+  <title>hungry</title>
   <link rel="stylesheet" type="text/css" href="style.css">
 
 </head>
@@ -10,9 +10,12 @@
 
   <div class="container">
     <div class="options">
-      <h1>nearby.</h1>
-      <p>find me: <input data-bind="value: query" /> <button data-bind="click: search">GO</button> </p>
+      <h1>I'm hungry</h1>
+      <p>I want: <input data-bind="value: query" /> <button data-bind="click: search">GO</button> </p>
       <p data-bind="text: errorMessage"></p>
+      <div data-bind="foreach: places">
+        <p data-bind="text: name"></p>
+      </div>
     </div>
     <div id="map"></div>
   </div>

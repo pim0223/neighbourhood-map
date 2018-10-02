@@ -1,83 +1,90 @@
-var Place = function(data) {
-    this.name = ko.observable(data.name);
-    this.coordinates = ko.observable(data.coordinates);
-    this.photo = ko.observable(data.photo);
-    this.types = ko.observable(data.types);
+var Place = function(result, map) {
+    that = this;
+
+    that.name = ko.observable(result.name);
+    that.coordinates = ko.observable(result.geometry.location);
+    
+    that.makeMarker = function () {
+        marker = new google.maps.Marker({
+            map: map,
+            position: that.coordinates(),
+            title: that.name()
+        });
+
+        return marker;
+    }
+
+    that.marker = that.makeMarker();
+
+    that.marker.addListener('click', function () {
+        map.infoWindow.setContent(this.title)
+        map.infoWindow.open(map, this);
+    });
+
 }
 
 var ViewModel = function () {
-
-    this.init = function () {
-        
-        // Initialize the map
-        this.map = new google.maps.Map(document.getElementById('map'), {
-                center: {lat: 51.919662988, lng: 4.4753314},
-                zoom: 13
-            });
-
-        // Initialize the placesService
-        this.placesService = new google.maps.places.PlacesService(this.map);
-
-        // Get map bounds
-        this.bounds = ko.observable(this.map.getBounds());
-
-        this.markers = ko.observableArray();
-        this.errorMessage = ko.observable('');
-
-        // Keep track of what the user queried
-        this.query = ko.observable("Pizza");
-    }
-    
     var that = this;
-    
-    // Clear existing markers on the map
-    this.clearMarkers = function() {
-        // Clear existing markers
-        if (that.markers()) {
-            for (let marker of that.markers()) {
-                marker.setMap(null);
-            }
-        }
+       
+    // Initialize the map
+    that.map = new google.maps.Map(document.getElementById('map'), {
+            center: {lat: 51.919662988, lng: 4.4753314},
+            zoom: 13
+        });
 
-        that.markers = ko.observableArray([]);
+    // Make placesService for looking up places from the Google Maps places API
+    that.placesService = new google.maps.places.PlacesService(that.map);
+
+    // Make StreetViewService for getting street view images for a place
+    that.streetViewService = new google.maps.StreetViewService();
+
+    that.places = ko.observableArray();
+    that.errorMessage = ko.observable();
+    that.map.infoWindow = new google.maps.InfoWindow();
+
+    // Keep track of what the user queried
+    that.query = ko.observable("Pizza");
+
+    // Clear markers for all places on the map
+    that.clearMarkers = function() {
+        for (let place of that.places()) {
+            place.marker.setMap(null);
+        }
     }
 
-    this.placeMarkers = function (results) {
-        for (let result of results) {
-            marker = new google.maps.Marker({
-                map: that.map,
-                position: result.geometry.location
-            });
-            that.markers.push(marker);
-        }
-    }
+    that.callback = function (results, status) {
+        // Clear the markers off the map
+        that.clearMarkers();
 
-    this.callback = function(results, status) {
+        // Empty the places array
+        that.places([]);
         
-        that.clearMarkers()
         if (status === google.maps.places.PlacesServiceStatus.OK) {
             that.errorMessage('');
-            that.placeMarkers(results);
+
+            for (result of results) {
+                that.places.push(new Place(result, that.map));
+            };
         } 
+
+        // Display error message in case we don't get any results
         else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
             that.errorMessage("Could not find anything for your search term");
         }
     }
 
     // Search for places
-    this.search = function () {
-        this.placesService.nearbySearch({
-                  bounds: this.map.getBounds(),
-                  radius: 500,
+    that.search = function () {
+        that.placesService.nearbySearch({
+                  bounds: that.map.getBounds(),
+                  radius: 1000,
                   type: ['restaurant'],
-                  keyword: this.query()
-                }, this.callback);
+                  keyword: that.query()
+                }, that.callback);
     }
 };
 
 
 function initMap () {
-    viewModel = new ViewModel();
-    viewModel.init();
-    ko.applyBindings(viewModel);
+    ko.applyBindings(new ViewModel());
 }
