@@ -1,0 +1,102 @@
+html,
+body,
+#sidebar {
+  font-family: 'Roboto','Helvetica','Arial',sans-serif!important;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#sidebar {
+  width: 250px;
+  background: white;
+  position: fixed;
+  z-index: 1;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+#sidebar.collapse {
+    width: 50px;
+}
+
+#sidebar-content {
+  width: 230px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+#map {
+  height: 100%;
+  position: relative;
+}
+
+.hamburger-bar {
+    width: 30px;
+    height: 4px;
+    background-color: black;
+    margin: 5px 0;
+}
+
+#hamburger-icon {
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+#search-result {
+  cursor: pointer;
+}
+
+#search-result:hover {
+  font-weight: bold;
+}
+
+#search-result:active {
+  font-weight: bold;
+}
+
+#search-results {
+  width: 100%;
+  overflow-y: auto;
+  height: calc(100vh - 220px);
+}
+
+#place-search {
+height: 220px;
+}
+
+.footnote {
+  margin-top: -5px;
+  font-size: 9px;
+}
+
+.form-text, #title {
+  font-size: 16px;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+#panorama {
+  width: 300px;
+  height: 200px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.container {
+  height: 100%;
+  position: relative;
+}
+
+input {
+  font-size: 16px;
+  margin-bottom: 10px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  border-bottom: 1px solid black;
+}
+
+p {
+  font-size: 12px;
+  line-height: 12px;
+}
