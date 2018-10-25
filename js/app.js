@@ -74,7 +74,7 @@ var ViewModel = function () {
 
     that.makeMarkerBounce = function (marker) {
         // Stop the bouncing of other markers
-        that.stopMarkersBouncing(that.markers())
+        that.stopMarkersBouncing(that.markers());
         marker.setAnimation(google.maps.Animation.BOUNCE);
     }
 
@@ -96,7 +96,7 @@ var ViewModel = function () {
                 that.weather(`Weather: ${data.weather[0].description}`)
             }
             else {
-                that.weather(`Weather unavailable`)   
+                that.weather(`Failed to retrieve weather`)
             }
         }
 
@@ -107,7 +107,7 @@ var ViewModel = function () {
 
     // Add a StreetviewPanorama to a marker
    that.addPanorama = function (marker) {
-        const panorama = new google.maps.StreetViewPanorama(
+        let panorama = new google.maps.StreetViewPanorama(
           document.getElementById('panorama'), {
             position: marker.position,
             pov: {
@@ -126,14 +126,20 @@ var ViewModel = function () {
             `<div id="panorama">No panorama found</div>` +
             `<div id="weather"> ${that.weather()} </div>` +
             ` <p class="footnote">(Data by <a href="https://openweathermap.org/api">Openweathermap)</a></p>` 
-            )
+            );
 
-        that.infoWindow.open(map, marker);
         that.addPanorama(marker);
+        that.infoWindow.open(map, marker);
     }
 
     // Make markers according to search query
     that.makeMarkers = function (results, status) {
+        
+        // Clear markers from the map
+        for (let marker of that.markers()) {
+            marker.setMap(null);
+        };
+
         // Empty the markers array
         that.markers([]);
 
@@ -196,4 +202,8 @@ function initView () {
     viewModel.init();
 
     ko.applyBindings(viewModel);
+}
+
+function mapError () {
+    alert('Cannot load Google maps. Please try to refresh or check your internet connection');
 }
