@@ -1,5 +1,6 @@
 var ViewModel = function () {
-    const that = this;
+    "use strict";
+    let that = this;
        
     that.init = function () {
 
@@ -23,7 +24,7 @@ var ViewModel = function () {
         // Filter markers and list based on rating filter
         that.filteredMarkers = ko.computed(function() {
             if(!that.minRating()) {
-                that.showMarkers(that.markers())
+                that.showMarkers(that.markers());
                 return that.markers(); 
             } else {
                 that.clearMarkers(that.markers());
@@ -31,7 +32,7 @@ var ViewModel = function () {
                      if (marker.rating >= that.minRating()) {
                         that.showMarker(marker);
                         return true;
-                     };                     
+                     }                     
                 });
             }
         }, that);
@@ -49,88 +50,103 @@ var ViewModel = function () {
         that.infoWindow = new google.maps.InfoWindow({maxHeight: 400});
 
         // Searchbox for current location
-        that.placeInput = document.getElementById("placeInput")
+        that.placeInput = document.getElementById("placeInput");
         that.searchBox = new google.maps.places.SearchBox(that.placeInput);
-    }
+    };
 
     // Clear markers for all places on the map
     that.clearMarkers = function(markers) {
         for (let marker of markers) {
             marker.setMap(null);
         }
-    }
+    };
 
     // Show a set of markers on the map
     that.showMarkers = function(markers) {
         for (let marker of markers) {
             marker.setMap(that.map);
-        };
-    }
+        }
+    };
 
     // Show one marker on the map
     that.showMarker = function (marker) {
         marker.setMap(that.map);
-    }
+    };
 
     that.makeMarkerBounce = function (marker) {
         // Stop the bouncing of other markers
         that.stopMarkersBouncing(that.markers());
         marker.setAnimation(google.maps.Animation.BOUNCE);
-    }
+    };
 
     that.stopMarkersBouncing = function (markers) {
         for (let marker of markers) {
             marker.setAnimation(null);
         }
-    }
+    };
+
+    // Callback function for when a list item is clicked
+    that.listClickCallback = function (marker) {
+        that.makeMarkerBounce(marker);
+        that.showInfoWindow(marker);
+    };
 
     // Get the weather for the current map location from the openweathermap API
     that.getWeather = function () {
 
-        let mapCenter = that.map.getCenter()
+        let mapCenter = that.map.getCenter();
 
-        let url = `http://api.openweathermap.org/data/2.5/weather?lat=${mapCenter.lat()}&lon=${mapCenter.lng()}&APPID=947fb8237f2dbc03a4fe2ea0a1feab24`
+        let url = `http://api.openweathermap.org/data/2.5/weather?lat=${mapCenter.lat()}&lon=${mapCenter.lng()}&APPID=947fb8237f2dbc03a4fe2ea0a1feab24`;
         
         function updateWeather(data, status) {
             if (status == "success") {
-                that.weather(`Weather: ${data.weather[0].description}`)
+                that.weather(`Weather: ${data.weather[0].description}`);
             }
             else {
-                that.weather(`Failed to retrieve weather`)
+                that.weather('Failed to retrieve weather');
             }
         }
 
         $.get(url, function(data, status){
             updateWeather(data, status);
+        })
+        .fail(function(){
+            that.weather('Failed to retrieve weather');
         });
-    }
+    };
 
-    // Add a StreetviewPanorama to a marker
-   that.addPanorama = function (marker) {
-        let panorama = new google.maps.StreetViewPanorama(
-          document.getElementById('panorama'), {
-            position: marker.position,
-            pov: {
-              heading: 0,
-              pitch: 10
-            }
-          });
+    // Add a StreetviewPanorama to the infowindow
+   that.addPanoramaToInfowindow = function (data, status) {
+         if (status == google.maps.StreetViewStatus.OK) {
 
-        that.map.setStreetView(panorama);
-    }
+            let panorama = new google.maps.StreetViewPanorama(
+                document.getElementById('panorama'), {
+                    position: data.location.latLng,
+                    pov: {
+                        heading: 0,
+                        pitch: 10
+                    }
+                });
+
+            that.map.setStreetView(panorama);
+        }
+    };
+
 
     // Show infowindow on marker, displaying name, rating, streetview and weather
     that.showInfoWindow = function (marker) {
         that.infoWindow.setContent(
             `<div id ="title">  ${marker.title} | ${marker.rating} &#9733</div>` + 
-            `<div id="panorama">No panorama found</div>` +
+            `<div id="panorama"> Could not retrieve street view </div>` +
             `<div id="weather"> ${that.weather()} </div>` +
             ` <p class="footnote">(Data by <a href="https://openweathermap.org/api">Openweathermap)</a></p>` 
             );
 
-        that.addPanorama(marker);
-        that.infoWindow.open(map, marker);
-    }
+        // Get a streetviewpanorama at the marker's position
+        that.streetViewService.getPanorama({location: marker.position, radius: 50}, that.addPanoramaToInfowindow);
+ 
+        that.infoWindow.open(map, marker);        
+    };
 
     // Make markers according to search query
     that.makeMarkers = function (results, status) {
@@ -138,7 +154,7 @@ var ViewModel = function () {
         // Clear markers from the map
         for (let marker of that.markers()) {
             marker.setMap(null);
-        };
+        }
 
         // Empty the markers array
         that.markers([]);
@@ -160,22 +176,22 @@ var ViewModel = function () {
                 });     
 
                 that.markers.push(marker);
-            };
+            }
         } 
 
         // Display error message in case we don't get any results
         else if (status === google.maps.places.PlacesServiceStatus.ZERO_RESULTS) {
             that.errorMessage("Could not find anything for your search term");
         }
-    }
+    };
 
     // Search for places
     that.searchPlaces = function () {
         let places = that.searchBox.getPlaces();
         
         if (!places) {
-            that.errorMessage('Please enter a valid location')
-            return
+            that.errorMessage('Please enter a valid location');
+            return;
         }
         else {
             let place = places[0].geometry.location;
@@ -189,16 +205,16 @@ var ViewModel = function () {
                   type: ['restaurant'],
                   keyword: that.query()
                 }, that.makeMarkers);
-    }
+    };
 
     // Toggle side menu
     that.toggleMenu = function () {
-        that.menuVisible(!that.menuVisible())
-    }
+        that.menuVisible(!that.menuVisible());
+    };
 };
 
 function initView () {
-    viewModel = new ViewModel();
+    let viewModel = new ViewModel();
     viewModel.init();
 
     ko.applyBindings(viewModel);

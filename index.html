@@ -7,7 +7,8 @@
   <link rel="stylesheet" type="text/css" href="css/style.css">
 
   <meta name="viewport" content="width=device-width">
-  
+  <meta charset="utf-8">
+
   <!-- Material design for the button -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.amber-blue.min.css">
@@ -44,7 +45,7 @@
         <!-- Search results -->
         <div id="search-results" data-bind="foreach: filteredMarkers, visible: menuVisible">
           <hr>
-          <p id="search-result" data-bind="text: title, click: $parent.showInfoWindow, $parent.toggleBounce"></p>
+          <p id="search-result" data-bind="text: title, click: $parent.listClickCallback"></p>
 
         </div> 
       </div> 
